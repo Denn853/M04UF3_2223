@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<title>ENTI Survivors</title>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js" integrity="sha512-kg6fSrg6FkD9Ua02PzuA289KatVkTp6HdiFrSKwnz1bKBeKe5JG54rNeYZeghYO/I4ka49rb9H/9Ezcq9Se3iQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	</head>
+
+	<body>
+		<h1>ENTI Survivors</h1>
+
+		<script>
+			
+			const config = {
+				width: 960, 
+				height: 540,
+				scene: {
+					preload: precarga,
+					create: crear,
+					update: actualiza
+				}
+			};
+
+			const game = new Phaser.Game(config);
+
+			let player;
+
+			function precarga(){
+				this.load.image("player-img", "player.png");
+			}
+
+			function crear() {
+				player = this.add.image(64, 64, "player-img");
+			}
+
+			function actualiza() {
+
+			}
+
+
+		</script>
+	</body>
+
+</html>

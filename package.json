@@ -1,0 +1,19 @@
+{
+  "name": "enti_survivors",
+  "version": "1.0.0",
+  "description": "Proyecto de juego estilo Vampire Survivors",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Denn853/M04UF3_2223.git"
+  },
+  "author": "Dennys Hernández Muñiz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Denn853/M04UF3_2223/issues"
+  },
+  "homepage": "https://github.com/Denn853/M04UF3_2223#readme"
+}
