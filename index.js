@@ -1,10 +1,10 @@
 
-const http = require("http");
-const fs = require("fs");
+const http = require('http');
+const fs = require('fs');
 
-http.createServer(function(request, response) {
+http.createServer(function (request, response) {
 
-	fs.readFile("index.html", function(err, data) {
+	fs.readFile("index.html", function (err, data) {
 		
 		if (err) {
 			console.error(err);
@@ -17,16 +17,17 @@ http.createServer(function(request, response) {
 		response.end();
 	})
 
-	 fs.readFile("player.png", function(err, data) {
+	 fs.readFile("PlayerEnemies/Player.png", function (err, data) {
 
       if (err) {
          console.error(err);
          return;
       }
 
-      response.writeHead(200, {"Content-Type":"text/html"});
+      response.writeHead(200, {"Content-Type":"image/png"});
       response.write(data);
 
       response.end();
    })
-})
+
+}).listen(8530);
