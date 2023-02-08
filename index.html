@@ -27,16 +27,60 @@
 
 			let player;
 
+			let player_speed = 2;
+
+			let enemies = [];
+			let enemy_padding = 128;
+			let enemies_pos = [
+				{x: enemy_padding, y: enemy_padding},
+				{x: config.width/2, y: enemy_padding},
+				{x: config.width - enemy_padding, y: enemy_padding},
+
+				{x: config.width - enemy_padding, y: config.height/2},
+
+				{x: config.width - enemy_padding, y: config.height - enemy_padding},
+				{x: config.width/2, y: config.height - enemy_padding},
+				{x: enemy_padding, y: config.height - enemy_padding},
+
+				{x: enemy_padding, y: config.height/2}
+			];
+
+			let key_left;
+			let key_right;
+			let key_up;
+			let key_down;
+
 			function precarga(){
 				this.load.image("player-img", "player.png");
 			}
 
 			function crear() {
-				player = this.add.image(64, 64, "player-img");
+				player = this.add.image(config.width/2, config.height/2, "player-img");
+
+				for (let i = 0; i < enemies_pos.length; i++) {
+					this.add.image(enemies_pos[i].x, enemies_pos[i].y, "player-img");
+				}
+
+				key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+				key_right = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+				key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+				key_down = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 			}
 
 			function actualiza() {
+				if (key_left.isDown) {
+					player.x -= player_speed;
+				}
+				else if (key_right.isDown) {
+					player.x += player_speed;
+				}	
 
+				if (key_up.isDown) {
+					player.y -= player_speed;
+				}
+				else if (key_down.isDown) {
+					player.y += player_speed;
+				}
 			}
 
 
