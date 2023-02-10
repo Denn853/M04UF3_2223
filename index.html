@@ -5,7 +5,10 @@
 	<head>
 		<title>ENTI Survivors</title>
 
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js" integrity="sha512-kg6fSrg6FkD9Ua02PzuA289KatVkTp6HdiFrSKwnz1bKBeKe5JG54rNeYZeghYO/I4ka49rb9H/9Ezcq9Se3iQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<!--script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js" integrity="sha512-kg6fSrg6FkD9Ua02PzuA289KatVkTp6HdiFrSKwnz1bKBeKe5JG54rNeYZeghYO/I4ka49rb9H/9Ezcq9Se3iQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script-->
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser-arcade-physics.min.js" integrity="sha512-3ggJ43PNjH5aQCsd8/CBKa18RPMR8OaQX0JvHCZ4iJO/2Jk9mLdVZYVGFVUJmIoKeoF9Hg1pVgmROv9+xpgQlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 	</head>
 
 	<body>
@@ -16,6 +19,14 @@
 			const config = {
 				width: 960, 
 				height: 540,
+
+				physics:{
+					default:'arcade',
+					arcade: {
+						debug: true
+					}
+				},
+
 				scene: {
 					preload: precarga,
 					create: crear,
@@ -26,7 +37,6 @@
 			const game = new Phaser.Game(config);
 
 			let player;
-
 			let player_speed = 2;
 
 			let enemies = [];
@@ -56,10 +66,19 @@
 
 			function crear() {
 				player = this.add.image(config.width/2, config.height/2, "player-img");
+				
+				this.physics.add.existing(player, false);
+				player.body.setCollideWorldBounds(true);
 
 				for (let i = 0; i < enemies_pos.length; i++) {
-					this.add.image(enemies_pos[i].x, enemies_pos[i].y, "player-img");
+					enemies.push(this.add.image(enemies_pos[i].x, enemies_pos[i].y, "player-img"));
+
+					this.physics.add.existing(enemies[i], false);
+					enemies[i].body.setCollideWorldBounds(true);
+
 				}
+
+				this.physics.add.collider(player, enemies);
 
 				key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
 				key_right = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
@@ -81,8 +100,11 @@
 				else if (key_down.isDown) {
 					player.y += player_speed;
 				}
-			}
 
+				for (let i = 0; i < enemies_pos.length; i++) {
+					this.physics.moveToObject(enemies[i], player, 25);
+				}
+			}
 
 		</script>
 	</body>
