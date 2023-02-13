@@ -2,4 +2,8 @@
 Asignatura de llenguatge de marques
 
 
-Comandos Git: git add -A . git commit -m " comentario " git push git pull
+Comandos Git: 
+- git add -A . 
+- git commit -m " comentario " 
+- git push 
+- git pull
