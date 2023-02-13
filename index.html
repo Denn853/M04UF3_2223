@@ -60,9 +60,13 @@
 			let key_up;
 			let key_down;
 
+			let rand = $(( $RANDOM % 29 + 1  ))
+
 			function precarga(){
+
 				this.load.image("player-img", "player.png");
 				this.load.image("enemy-img", "enemy.png");
+				this.load.image("enemies-img", "enemy[rand].png");
 			}
 
 			function crear() {
@@ -72,11 +76,12 @@
 				player.body.setCollideWorldBounds(true);
 
 				for (let i = 0; i < enemies_pos.length; i++) {
-					enemies.push(this.add.image(enemies_pos[i].x, enemies_pos[i].y, "enemy-img"));
+					enemies.push(this.add.image(enemies_pos[i].x, enemies_pos[i].y, "enemies-img"));
 
 					this.physics.add.existing(enemies[i], false);
 					enemies[i].body.setCollideWorldBounds(true);
 
+					this.physics.add.collider(enemies, enemies);
 				}
 
 				this.physics.add.collider(player, enemies);
