@@ -32,6 +32,21 @@ function send_player(response) {
    });
 }
 
+function send_enemy(response) {
+   fs.readFile("enemy.png", function(err, data) {
+
+      if (err) {
+         console.error(err);
+         return;
+      }
+
+      response.writeHead(200, {"Content-Type":"image/png"});
+      response.write(data);
+
+      response.end();
+   });
+}
+
 http.createServer(function(request, response) {
 
 	console.log(request.url);
@@ -41,6 +56,10 @@ http.createServer(function(request, response) {
 	switch (url[1]) {
 		case "player.png":
 			send_player(response);			
+			break;
+
+		case "enemy.png":
+			send_enemy(response);
 			break;
 
 		default:
