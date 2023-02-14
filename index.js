@@ -17,8 +17,8 @@ function send_index(response) {
    });
 }
 
-function send_player(response) {
-	fs.readFile("player.png", function(err, data) {
+function send_player(response, image) {
+	fs.readFile("imgs/" + image, function(err, data) {
 
       if (err) {
          console.error(err);
@@ -32,7 +32,7 @@ function send_player(response) {
    });
 }
 
-function send_enemy(response) {
+/*function send_enemy(response) {
    fs.readFile("enemy.png", function(err, data) {
 
       if (err) {
@@ -47,11 +47,13 @@ function send_enemy(response) {
    });
 }
 
-function send_enemies(response) {
+function send_enemies(response, image) {
    
 	let rand = $(( $RANDOM % 29 + 1  ))
+	
+	image = "enemy$(( $RANDOM % 29 + 1 )).png"
 
-	fs.readFile("enemy[rand].png", function(err, data) {
+	fs.readFile("imgs/" + image, function(err, data) {
 
       if (err) {
          console.error(err);
@@ -63,7 +65,8 @@ function send_enemies(response) {
 
       response.end();
    });
-}
+}*/
+
 
 http.createServer(function(request, response) {
 
@@ -71,10 +74,7 @@ http.createServer(function(request, response) {
 
 	let url = request.url.split("/");
 
-	let name;
-	let extension = ".png"
-
-	switch (url[1] = name+extension) {
+/*	switch (url[1].match("png")) {
 		case "player":
 			send_player(response);			
 			break;
@@ -85,19 +85,25 @@ http.createServer(function(request, response) {
 
 		default:
 			send_index(response);
+*/
+
+	if (url[1].match("png")) {
+		send_player(response, url[1]);
+		return;
 	}
-
+	
 	fs.readFile("index.html", function(err, data) {
-		
-		if (err) {
-			console.error(err);
-			return;
-		}
 
-		response.writeHead(200, {"Content-Type":"text/html"});
-		response.write(data);
+	      if (err) {
+      	   console.error(err);
+        		return;
+   	   }
+	
+	      response.writeHead(200, {"Content-Type":"text/html"});
+      	response.write(data);
 
-		response.end();
-	});
+   	   response.end();
+	})
 
 }).listen(8530);
+

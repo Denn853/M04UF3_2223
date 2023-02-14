@@ -38,7 +38,8 @@
 
 			let player;
 			let player_speed = 2;
-
+			
+			let enemy;
 			let enemies = [];
 			let enemy_padding = 128;
 			let enemies_pos = [
@@ -60,14 +61,29 @@
 			let key_up;
 			let key_down;
 
-			let rand = $(( $RANDOM % 29 + 1  ))
+//			let rand = $(( $RANDOM % 29 + 1  ))
 
 			function precarga(){
 
 				this.load.image("player-img", "player.png");
-				this.load.image("enemy-img", "enemy.png");
-				this.load.image("enemies-img", "enemy[rand].png");
+//				this.load.image("enemy-img", "enemy.png");
+		
+			//	this.load.image("enemies-img", "enemy$(( $RANDOM % 29 + 1 )).png");
+
+			/*	for (let i = 1; i <= 28; i++){
+					this.load.image("enemies-img", "enemy[i].png");
+				}*/
+
+				this.load.image("enemy-1", "enemy1.png"); 
+				this.load.image("enemy-2", "enemy2.png"); 
+				this.load.image("enemy-3", "enemy3.png"); 
+				this.load.image("enemy-4", "enemy4.png"); 
+				this.load.image("enemy-5", "enemy5.png"); 
+				this.load.image("enemy-6", "enemy6.png"); 
+				this.load.image("enemy-7", "enemy7.png"); 
+				this.load.image("enemy-8", "enemy8.png"); 
 			}
+				
 
 			function crear() {
 				player = this.add.image(config.width/2, config.height/2, "player-img");
@@ -76,12 +92,16 @@
 				player.body.setCollideWorldBounds(true);
 
 				for (let i = 0; i < enemies_pos.length; i++) {
-					enemies.push(this.add.image(enemies_pos[i].x, enemies_pos[i].y, "enemies-img"));
+					//enemies.push(this.add.image(enemies_pos[i].x, enemies_pos[i].y, "enemies-img"));
+
+					enemy = this.add.sprite(enemies_pos[i].x, enemies_pos[i].y "enemy-" + (i + 1));
 
 					this.physics.add.existing(enemies[i], false);
 					enemies[i].body.setCollideWorldBounds(true);
 
-					this.physics.add.collider(enemies, enemies);
+					enemies.push(enemy);
+
+					//this.physics.add.collider(enemies, enemies);
 				}
 
 				this.physics.add.collider(player, enemies);
@@ -107,9 +127,11 @@
 					player.y += player_speed;
 				}
 
-				for (let i = 0; i < enemies_pos.length; i++) {
+				for (let i = 0; i < enemies.length; i++) {
 					this.physics.moveToObject(enemies[i], player, 25);
+					this.physics.collide(enemies[i], enemies);
 				}
+				this.physics.collide(player, enemies);
 			}
 
 		</script>
