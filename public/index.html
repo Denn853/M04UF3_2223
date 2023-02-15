@@ -32,7 +32,14 @@
 
 			const game = new Phaser.Game(config);
 			
+			let bg;
+
 			let player;
+			let player_speed = 3;
+			
+			let weapon;
+
+			let enemies_max = 28;
 			let enemies = [];
 			let enemy_padding = 128;
 			let enemies_pos = [
@@ -46,8 +53,6 @@
 				{x: config.width - enemy_padding, y: config.height - enemy_padding}
 			]
 
-			let player_speed = 3;
-
 			let keyLeft;
 			let keyRight;
 			let keyUp;
@@ -55,38 +60,49 @@
 
 			function precarga () {
 
-				this.load.image("player-img", "player.png");
-				this.load.image("enemy-1", "enemy1.png");
-				this.load.image("enemy-2", "enemy2.png");
-				this.load.image("enemy-3", "enemy3.png");
-				this.load.image("enemy-4", "enemy4.png");
-				this.load.image("enemy-5", "enemy5.png");
-				this.load.image("enemy-6", "enemy6.png");
-				this.load.image("enemy-7", "enemy7.png");
-				this.load.image("enemy-8", "enemy8.png");
-				
+				this.load.image("bg-img", "imgs/background.png");	
+				this.load.image("player-img", "imgs/player.png");
+				for (let i = 1; i <= enemies_max; i++) {
+					this.load.image("enemy"+i, "imgs/enemy"+ i + ".png");
+				}
+				this.load.image("weapon-img", "imgs/bat_metal.png");
 			}
 
 			function crear () {
 
+				bg = this.add.image(config.width / 2, config.height / 2, "bg-img");
 				player = this.add.image(config.width / 2, config.height / 2, "player-img");
 				
 				this.physics.add.existing(player, false);
 				player.body.setCollideWorldBounds(true);
 
 				for (let i = 0; i < enemies_pos.length; i++) {
-					let enemy = this.add.sprite(enemies_pos[i].x, enemies_pos[i].y , "enemy-" + (i + 1));
-					this.physics.add.existing(enemy, false);
-					enemy.body.setCollideWorldBounds(true);
-					enemies.push(enemy);
-				}
-				
-				this.physics.add.collider(player, enemies);
+					let enemy = "enemy"+Math.floor(Math.random()*enemies_max+1);
 
+					let e = this.add.image(enemies_pos[i].x, enemies_pos[i].y, enemy )
+
+					this.physics.add.existing(e, false);
+					e.body.setCollideWorldBounds(true);
+					enemies.push(e);
+				}
+			
+				this.physics.add.collider(player, enemies);
+				this.physics.add.collider(enemies, enemies);
+	
+				weapon = this.add.image(config.width / 2, config.height / 2, "weapon-img");
+				weapon.visible = false;
+			
 				key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
 				key_right= this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 				key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 				key_down = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+
+				setInterval(function(){
+					weapon.visible = true;
+					setTimeout(function(){
+						weapon.visible = false;
+					}, 400);
+				}, 2000);
 			}
 			
 			function actualiza () {
