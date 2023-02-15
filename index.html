@@ -10,23 +10,19 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser-arcade-physics.min.js" integrity="sha512-3ggJ43PNjH5aQCsd8/CBKa18RPMR8OaQX0JvHCZ4iJO/2Jk9mLdVZYVGFVUJmIoKeoF9Hg1pVgmROv9+xpgQlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 	</head>
-
 	<body>
 		<h1>ENTI Survivors</h1>
-
 		<script>
-			
+
 			const config = {
-				width: 960, 
+				width: 960,
 				height: 540,
-
-				physics:{
-					default:'arcade',
-					arcade: {
-						debug: true
-					}
-				},
-
+				physics: {
+			        default: 'arcade',
+			        arcade: {
+			            debug: true
+			        }
+			    },
 				scene: {
 					preload: precarga,
 					create: crear,
@@ -35,91 +31,74 @@
 			};
 
 			const game = new Phaser.Game(config);
-
-			let player;
-			let player_speed = 2;
 			
-			let enemy;
+			let player;
 			let enemies = [];
 			let enemy_padding = 128;
 			let enemies_pos = [
 				{x: enemy_padding, y: enemy_padding},
-				{x: config.width/2, y: enemy_padding},
+				{x: config.width / 2, y: enemy_padding},
 				{x: config.width - enemy_padding, y: enemy_padding},
-
-				{x: config.width - enemy_padding, y: config.height/2},
-
-				{x: config.width - enemy_padding, y: config.height - enemy_padding},
-				{x: config.width/2, y: config.height - enemy_padding},
+				{x: enemy_padding, y: config.height / 2},
+				{x: config.width - enemy_padding, y: config.height / 2},
 				{x: enemy_padding, y: config.height - enemy_padding},
+				{x: config.width / 2, y: config.height - enemy_padding},
+				{x: config.width - enemy_padding, y: config.height - enemy_padding}
+			]
 
-				{x: enemy_padding, y: config.height/2}
-			];
+			let player_speed = 3;
 
-			let key_left;
-			let key_right;
-			let key_up;
-			let key_down;
+			let keyLeft;
+			let keyRight;
+			let keyUp;
+			let keyDown;
 
-//			let rand = $(( $RANDOM % 29 + 1  ))
-
-			function precarga(){
+			function precarga () {
 
 				this.load.image("player-img", "player.png");
-//				this.load.image("enemy-img", "enemy.png");
-		
-			//	this.load.image("enemies-img", "enemy$(( $RANDOM % 29 + 1 )).png");
-
-			/*	for (let i = 1; i <= 28; i++){
-					this.load.image("enemies-img", "enemy[i].png");
-				}*/
-
-				this.load.image("enemy-1", "enemy1.png"); 
-				this.load.image("enemy-2", "enemy2.png"); 
-				this.load.image("enemy-3", "enemy3.png"); 
-				this.load.image("enemy-4", "enemy4.png"); 
-				this.load.image("enemy-5", "enemy5.png"); 
-				this.load.image("enemy-6", "enemy6.png"); 
-				this.load.image("enemy-7", "enemy7.png"); 
-				this.load.image("enemy-8", "enemy8.png"); 
-			}
+				this.load.image("enemy-1", "enemy1.png");
+				this.load.image("enemy-2", "enemy2.png");
+				this.load.image("enemy-3", "enemy3.png");
+				this.load.image("enemy-4", "enemy4.png");
+				this.load.image("enemy-5", "enemy5.png");
+				this.load.image("enemy-6", "enemy6.png");
+				this.load.image("enemy-7", "enemy7.png");
+				this.load.image("enemy-8", "enemy8.png");
 				
+			}
 
-			function crear() {
-				player = this.add.image(config.width/2, config.height/2, "player-img");
+			function crear () {
+
+				player = this.add.image(config.width / 2, config.height / 2, "player-img");
 				
 				this.physics.add.existing(player, false);
 				player.body.setCollideWorldBounds(true);
 
 				for (let i = 0; i < enemies_pos.length; i++) {
-					//enemies.push(this.add.image(enemies_pos[i].x, enemies_pos[i].y, "enemies-img"));
-
-					enemy = this.add.sprite(enemies_pos[i].x, enemies_pos[i].y "enemy-" + (i + 1));
-
-					this.physics.add.existing(enemies[i], false);
-					enemies[i].body.setCollideWorldBounds(true);
-
+					let enemy = this.add.sprite(enemies_pos[i].x, enemies_pos[i].y , "enemy-" + (i + 1));
+					this.physics.add.existing(enemy, false);
+					enemy.body.setCollideWorldBounds(true);
 					enemies.push(enemy);
-
-					//this.physics.add.collider(enemies, enemies);
 				}
-
+				
 				this.physics.add.collider(player, enemies);
 
 				key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
-				key_right = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+				key_right= this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 				key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 				key_down = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 			}
+			
+			function actualiza () {
 
-			function actualiza() {
+
 				if (key_left.isDown) {
 					player.x -= player_speed;
 				}
 				else if (key_right.isDown) {
 					player.x += player_speed;
-				}	
-
+				}
+				
 				if (key_up.isDown) {
 					player.y -= player_speed;
 				}
@@ -127,12 +106,15 @@
 					player.y += player_speed;
 				}
 
-				for (let i = 0; i < enemies.length; i++) {
-					this.physics.moveToObject(enemies[i], player, 25);
+				for (let i= 0; i < enemies.length; i++) {
+					this.physics.moveToObject(enemies[i], player);
 					this.physics.collide(enemies[i], enemies);
 				}
+
+				  
 				this.physics.collide(player, enemies);
-			}
+
+		}
 
 		</script>
 	</body>
