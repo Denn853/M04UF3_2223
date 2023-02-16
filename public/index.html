@@ -72,7 +72,7 @@
 			function crear () {
 
 				bg = this.add.image(config.width / 2, config.height / 2, "bg-img");
-				player = this.add.image(config.width / 2, config.height / 2, "player-img");
+				player = this.add.image(config.width / 2 - weapon_offset, config.height / 2, "player-img");
 				
 				this.physics.add.existing(player, false);
 				player.body.setCollideWorldBounds(true);
@@ -91,8 +91,12 @@
 				this.physics.add.collider(enemies, enemies);
 	
 				weapon = this.add.image(config.width / 2, config.height / 2, "weapon-img");
+				
+				this.physics.add.existing(weapon, false);
+
 				weapon.visible = false;
-			
+
+
 				key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
 				key_right= this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 				key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
@@ -100,38 +104,47 @@
 
 				setInterval(function(){
 					weapon.visible = true;
+
 					setTimeout(function(){
 						weapon.visible = false;
 					}, 400);
+
 				}, 2000);
 			}
 			
 			function actualiza () {
 
-
 				if (key_left.isDown) {
 					player.x -= player_speed;
-					weapon
+					weapon.x = player.x - weapon_offset;
+					weapon.y = player.y;
 				}
 				else if (key_right.isDown) {
 					player.x += player_speed;
+					weapon.x = player.x + weapon_offset;
+					weapon.y = player.y;
 				}
 				
 				if (key_up.isDown) {
 					player.y -= player_speed;
+					weapon.y = player.y - weapon_offset;
+					weapon.x = player.x;
 				}
 				else if (key_down.isDown) {
 					player.y += player_speed;
+					weapon.y = player.y + weapon_offset;
+					weapon.x = player.x;
 				}
 
 				for (let i= 0; i < enemies.length; i++) {
 					this.physics.moveToObject(enemies[i], player);
+					this.physics.collide(player, enemies);
 					this.physics.collide(enemies[i], enemies);
+
+					if (this.physics.collide(weapon, enemies[i])) {
+						console.log("I touch the enemy" + i);
+					}
 				}
-
-				  
-				this.physics.collide(player, enemies);
-
 		}
 
 		</script>
