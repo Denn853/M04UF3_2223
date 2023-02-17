@@ -32,6 +32,8 @@
 
 			const game = new Phaser.Game(config);
 			
+			let game_start = false;
+
 			let bg;
 
 			let player;
@@ -127,7 +129,11 @@
 			last_y = config.height / 2;
 
 			function actualiza () {
-			
+		
+				if (!game_start) {
+				//	return;
+				}
+
 				if (key_left.isDown) {
 					player.x -= player_speed;
 					
@@ -183,6 +189,7 @@
 					case "D":	
 						weapon.x = player.x;
 						weapon.y = player.y + weapon_offset;
+						weapon.rotation = 90*Math.PI/180;
 						weapon.rotation = 90*Math.PI/180;
 						break;
 				}
