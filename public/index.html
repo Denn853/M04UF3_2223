@@ -37,6 +37,9 @@
 			let player;
 			let player_speed = 3;
 			
+			let score = 0;
+			let score_text;
+
 			let weapon;
 
 			let enemies_max = 28;
@@ -104,7 +107,9 @@
 					}, 400);
 				}, 2000);
 			}
-			
+
+			score_text = this.add.text(0, 0, '0');
+
 			function actualiza () {
 
 
