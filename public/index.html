@@ -1,17 +1,48 @@
 <!DOCTYPE html>
-
 <html>
-
 	<head>
 		<title>ENTI Survivors</title>
-
+		
 		<!--script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js" integrity="sha512-kg6fSrg6FkD9Ua02PzuA289KatVkTp6HdiFrSKwnz1bKBeKe5JG54rNeYZeghYO/I4ka49rb9H/9Ezcq9Se3iQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script-->
-
+		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser-arcade-physics.min.js" integrity="sha512-3ggJ43PNjH5aQCsd8/CBKa18RPMR8OaQX0JvHCZ4iJO/2Jk9mLdVZYVGFVUJmIoKeoF9Hg1pVgmROv9+xpgQlQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 	</head>
+	
 	<body>
+		
 		<h1>ENTI Survivors</h1>
+		
+		<form>
+			
+			<section id="difficulty-selection">
+				<p><label for="medium">Dificultad</label></p>
+				<ol>
+					<li>
+						<input type="radio" id="easy" name="difficulty"/>
+						<label for="easy">Easy</label>
+					</li>
+					<li>
+						<input type="radio" id="medium" name="difficulty" checked/>
+						<label for="medium">Medium</label>
+					</li>
+					<li>
+						<input type="radio" id="hard" name="difficulty"/>
+						<label for="hard">Hard</label>
+					</li>
+				</ol>
+			</section>
+		
+			<section id="game-choose">
+				<button type="button" id="increment" onclick="setIncrement(); return false;">Increment</button>
+				<button type="button" id="decrement" onclick="setDecrement(); return false;">Decrement</button>
+			</section>
+
+			<section>
+				<button type="button" id="play-button" onclick="startGame(); return false;">Play</button>
+			</section>
+		
+		</form>
+
 		<script>
 
 			const config = {
@@ -32,106 +63,223 @@
 
 			const game = new Phaser.Game(config);
 			
-			let game_start = false;
-
-			let bg;
-
 			let player;
 			let player_speed = 3;
-
-			let score = 0;
-			let score_text;
-
-			let weapon;
+			let player_lifes = 100;
+			let text_player_lifes;
+			
+			let player_weapon;
 			let weapon_offset = 48;
-
-			let enemies_max = 28;
+			
 			let enemies = [];
-			let enemy_padding = 128;
+			let enemies_max = 28;
+			let enemies_offset = 5;
 			let enemies_pos = [
-				{x: enemy_padding, y: enemy_padding},
-				{x: config.width / 2, y: enemy_padding},
-				{x: config.width - enemy_padding, y: enemy_padding},
-				{x: enemy_padding, y: config.height / 2},
-				{x: config.width - enemy_padding, y: config.height / 2},
-				{x: enemy_padding, y: config.height - enemy_padding},
-				{x: config.width / 2, y: config.height - enemy_padding},
-				{x: config.width - enemy_padding, y: config.height - enemy_padding}
-			]
+				{x: 0, y: -enemies_offset},
+				{x: config.width / 3, y: -enemies_offset},
+				{x: 2 * config.width / 3, y: -enemies_offset},
+				{x: config.width, y: -enemies_offset},
+				{x: -enemies_offset, y: config.height / 2},
+				{x: config.width + enemies_offset, y: config.height / 2},
+				{x: 0, y: config.height + enemies_offset},
+				{x: config.width / 3, y: config.height + enemies_offset},
+				{x: 2 * config.width / 3, y: config.height + enemies_offset},
+				{x: config.width, y: config.height + enemies_offset}
+			];
+
+			let score = 0 
+			let text_score;
+
+			let timer = -1;
+			let text_timer;
+
+			let endStageText;
 
 			let keyLeft;
 			let keyRight;
 			let keyUp;
 			let keyDown;
+			
+			let gameObject;
+			let start = false;
+			let difficulty;
+			let gameType = "increment";
 
-			let last_dir;
-			let last_x;
-			let last_y;
+			let enemySpawn;
+			let weaponSpawn;
+			let timerSpawn;
+
+			function getDifficulty () {
+
+				let list = document.getElementsByName("difficulty");
+
+				for (let i = 0; i < list.length; i++) {
+					if (list[i].checked) {
+						return list[i].id;
+					}
+				}
+			}
+
+			function setIncrement () {
+				gameType = "increment";
+			}
+
+			function setDecrement () {
+				gameType = "decrement";
+			}
+
+			function setDifficulty () {
+				
+				difficulty = getDifficulty();
+			}
 
 			function precarga () {
 
-				this.load.image("bg-img", "imgs/background.png");	
 				this.load.image("player-img", "imgs/player.png");
+				this.load.image("bg-img", "imgs/background.png");
+				
 				for (let i = 1; i <= enemies_max; i++) {
-					this.load.image("enemy"+i, "imgs/enemy"+ i + ".png");
+					this.load.image("enemy" + i, "imgs/enemy" + i + ".png");
 				}
-				this.load.image("weapon-img", "imgs/bat_metal.png");
+
+				this.load.image("weapon", "imgs/bat_handle.png");
 			}
 
 			function crear () {
 
 				bg = this.add.image(config.width / 2, config.height / 2, "bg-img");
-				player = this.add.image(config.width / 2 - weapon_offset, config.height / 2, "player-img");
+				player = this.add.image(config.width / 2, config.height / 2, "player-img");
 				
 				this.physics.add.existing(player, false);
 				player.body.setCollideWorldBounds(true);
-
-				for (let i = 0; i < enemies_pos.length; i++) {
-					let enemy = "enemy"+Math.floor(Math.random()*enemies_max+1);
-
-					let e = this.add.image(enemies_pos[i].x, enemies_pos[i].y, enemy )
-
-					this.physics.add.existing(e, false);
-					e.body.setCollideWorldBounds(true);
-					enemies.push(e);
-				}
-			
-				this.physics.add.collider(player, enemies);
-				this.physics.add.collider(enemies, enemies);
-	
-				weapon = this.add.image(config.width / 2, config.height / 2, "weapon-img");
 				
-				this.physics.add.existing(weapon, false);
-
-				weapon.visible = false;
+				player_weapon = this.add.image(config.width / 2 - weapon_offset, config.height / 2, "weapon");
+				this.physics.add.existing(player_weapon, false);
+				
+				player_weapon.visible = false;
 
 				key_left = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
 				key_right= this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
 				key_up = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
 				key_down = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 
-				setInterval(() => {
-					weapon.visible = true;
-					this.physics.world.enable(weapon);
+				text_score = this.add.text(24, 24, "Score: 0", {font: '600 35px Arial', color: '#ffffff'});
+				text_timer = this.add.text(3 * config.width / 4, 24, "Time: 0", {font: '600 35px Arial', color: '#ffffff'});
+				endStageText = this.add.text(config.width / 3, config.height / 2, "", {font: '600 50px Arial', color: '#000000'});
+				text_player_lifes = this.add.text(config.width / 3, 24, "Lifes: 100", {font: '600 35px Arial', color: '#ffffff'});
+
+				this.physics.add.collider(enemies, player);
+				
+				gameObject = this
+			}
+			
+			function startGame () {
+				setDifficulty();
+				start = true;
+				endStageText.setText("");
+				score = 0;
+				
+				for (let i = 0; i < enemies.length; i++) {
+					enemies[i].visible = false;
+					gameObject.physics.world.disable(enemies[i]);
+				}
+
+				weaponSpawn = setInterval(() => {
+					
+					player_weapon.visible = true;
+					gameObject.physics.world.enable(player_weapon);
 
 					setTimeout(() => {
-						weapon.visible = false;
-						this.physics.world.disable(weapon);
+						player_weapon.visible = false;
+						gameObject.physics.world.disable(player_weapon);
 					}, 400);
 
 				}, 2000);
-			
-				score_text = this.add.text(16, 16, '0', {font:'600 64px Arial'});
+
+				if (gameType == "increment") {
+					
+					timer = 0;
+					player_lifes = 100;
+
+					timerSpawn = setInterval(() => {
+				
+						timer++;
+						text_timer.setText("Time: " + timer);
+
+					}, 1000);
+
+				} else if (gameType == "decrement") {
+					
+					timer = 60;
+					player_lifes = 100;
+
+					timerSpawn = setInterval(() => {
+				
+						timer--;
+						text_timer.setText("Time: " + timer);
+
+					}, 1000);
+				}
+
+				enemySpawn = setInterval(() => {
+					switch(difficulty) {
+						case "easy":
+							for (let i = 0; i < 2; i++) {
+								let pos = Math.floor(Math.random() * enemies_pos.length) 
+								let enemyImage = "enemy" + Math.floor(Math.random() * enemies_max + 1);
+								let enemy = gameObject.add.sprite(enemies_pos[pos].x, enemies_pos[pos].y , enemyImage);
+								gameObject.physics.add.existing(enemy, false);
+								enemies.push(enemy);
+							}
+							break;
+
+						case "medium":
+							for (let i = 0; i < 5; i++) {
+								let pos = Math.floor(Math.random() * enemies_pos.length) 
+								let enemyImage = "enemy" + Math.floor(Math.random() * enemies_max + 1);
+								let enemy = gameObject.add.sprite(enemies_pos[pos].x, enemies_pos[pos].y , enemyImage);
+								gameObject.physics.add.existing(enemy, false);
+								enemies.push(enemy);
+							}
+							break;
+						
+						case "hard":
+							for (let i = 0; i < 10; i++) {
+								let pos = Math.floor(Math.random() * enemies_pos.length) 
+								let enemyImage = "enemy" + Math.floor(Math.random() * enemies_max + 1);
+								let enemy = gameObject.add.sprite(enemies_pos[pos].x, enemies_pos[pos].y , enemyImage);
+								gameObject.physics.add.existing(enemy, false);
+								enemies.push(enemy);
+							}
+							break;
+					}
+				}, 5000);
+
+				text_player_lifes.setText("Lifes: " + player_lifes);
+				text_score.setText("Score: " + score);
 			}
-			
-			last_dir = "L";
-			last_x = config.width / 2;
-			last_y = config.height / 2;
+
+			function endStage () {
+				endStageText.setText("GAME OVER");
+				clearInterval(enemySpawn);
+				clearInterval(weaponSpawn);
+				clearInterval(timerSpawn);
+			}
+
+			let last_dir = "L";
+			let last_x = config.width / 2;
+			let last_y = config.height / 2;
 
 			function actualiza () {
-		
-				if (!game_start) {
-				//	return;
+				
+				if (player_lifes <= 0) {
+					endStage();
+					return;
+				}
+
+				if (timer == 0 && gameType == "decrement") {	
+					endStage();
+					return;
 				}
 
 				if (key_left.isDown) {
@@ -141,6 +289,7 @@
 					last_y = player.y;
 					last_dir = "L";
 				}
+
 				else if (key_right.isDown) {
 					player.x += player_speed;
 					
@@ -156,59 +305,58 @@
 					last_y = player.y;
 					last_dir = "U";
 				}
+
 				else if (key_down.isDown) {
 					player.y += player_speed;
-					
+		
 					last_x = player.x;
 					last_y = player.y;
 					last_dir = "D";
 				}
 
-				player.x = last_x;
-				player.y = last_y;
+				for (let i= 0; i < enemies.length; i++) {
+					this.physics.moveToObject(enemies[i], player);
+				
+					if (this.physics.collide(player, enemies[i])) {
+						player_lifes--;
+						text_player_lifes.setText("Lifes: " + player_lifes);
+					}
+					
+					if (this.physics.collide(player_weapon, enemies[i])) {
+						enemies[i].visible = false;
+						this.physics.world.disable(enemies[i]);
+						score ++;
+						text_score.setText("Score: " + score);
+					}
+				}
 
 				switch (last_dir) {
+				
 					case "L":
-						weapon.x = player.x - weapon_offset;
-						weapon.y = player.y;
-						weapon.rotation = 180*Math.PI/180;
+						player_weapon.x = player.x - weapon_offset;
+						player_weapon.y = player.y;
+						player_weapon.rotation = 180 * Math.PI / 180;
 						break;
-					
-					case "R":	
-						weapon.x = player.x + weapon_offset;
-						weapon.y = player.y;
-						weapon.rotation = 0;
+
+					case "R":
+						player_weapon.x = player.x + weapon_offset;
+						player_weapon.y = player.y;
+						player_weapon.rotation = 0;
 						break;
 
 					case "U":
-						weapon.x = player.x;
-						weapon.y = player.y - weapon_offset;
-						weapon.rotation = 270*Math.PI/180;
+						player_weapon.x = player.x;
+						player_weapon.y = player.y - weapon_offset;
+						player_weapon.rotation = 270 * Math.PI / 180;
 						break;
-					
-					case "D":	
-						weapon.x = player.x;
-						weapon.y = player.y + weapon_offset;
-						weapon.rotation = 90*Math.PI/180;
-						weapon.rotation = 90*Math.PI/180;
+
+					case "D":
+						player_weapon.x = player.x;
+						player_weapon.y = player.y + weapon_offset;
+						player_weapon.rotation = 90 * Math.PI / 180;
 						break;
 				}
-
-				for (let i= 0; i < enemies.length; i++) {
-					this.physics.moveToObject(enemies[i], player, 50);
-					this.physics.collide(player, enemies);
-					this.physics.collide(enemies[i], enemies);
-
-					if (this.physics.collide(weapon, enemies[i])) {
-						console.log("PUM!");
-						
-						enemies[i].visible = false;
-						this.physics.world.disable(enemies[i]);
-						score_text.text = ++score;
-
-					}
-				}
-		}
+			}
 
 		</script>
 	</body>
